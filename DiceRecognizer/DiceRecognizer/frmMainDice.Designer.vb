@@ -469,6 +469,8 @@ Partial Class frmMainDice
         'cbxCollectDataset
         '
         Me.cbxCollectDataset.AutoSize = True
+        Me.cbxCollectDataset.Checked = True
+        Me.cbxCollectDataset.CheckState = System.Windows.Forms.CheckState.Checked
         Me.cbxCollectDataset.Location = New System.Drawing.Point(614, 30)
         Me.cbxCollectDataset.Name = "cbxCollectDataset"
         Me.cbxCollectDataset.Size = New System.Drawing.Size(88, 16)

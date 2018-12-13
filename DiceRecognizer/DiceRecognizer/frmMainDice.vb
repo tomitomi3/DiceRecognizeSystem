@@ -17,15 +17,15 @@ Public Class frmMainDice
 
     Private clickedPointOnPBX As New Point(0, 0)
 
-    Private count_recognize As Integer = 0
-    Private aveDiceValue As Double = 0
+    Private countRecognize As Integer = 0
+    Private sumDiceValue As Double = 0
 
     Private RECENT_COUNT_FILE As String = "RecentDiceCount.txt"
     Private RECENT_PARAMETER_FILE As String = "RecentParameter.txt"
     Private RECENT_DICE_FILE As String = "RecentDice.txt"
 
     'dice recognize flg
-    Private doRecognize As Boolean = False
+    Private isRunSequence As Boolean = False
 
     'recognize parameters
     Private DICE_AVERAGE As Integer = 15
@@ -40,8 +40,8 @@ Public Class frmMainDice
     Private isOpt As Boolean = False
 
     'dice result
-    Private recognizedDice(5) As Integer
-    Private recognizedDiceList As New List(Of Integer)
+    Private recognizedDiceResult(5) As Integer
+    Private recognizedDiceResultList As New List(Of Integer)
 
     ''' <summary>状態遷移：Sleepの待機時間[ms]</summary>
     Private elapsedSleepMs As Long = 0
@@ -63,6 +63,9 @@ Public Class frmMainDice
 
     'クリップサイズ
     Private CLIP_SIZE = 128
+
+    '画像保存クラス
+    Private saveImage As New clsSaveImage()
 
     ''' <summary>
     ''' Form Load
@@ -177,7 +180,7 @@ Public Class frmMainDice
 
         'Dice
         Using writer As New StreamWriter(RECENT_DICE_FILE, True, Encoding.GetEncoding("Shift_JIS"))
-            For Each dice In recognizedDiceList
+            For Each dice In recognizedDiceResultList
                 writer.WriteLine(String.Format("{0}", dice))
             Next
         End Using
@@ -203,8 +206,8 @@ Public Class frmMainDice
         End Using
 
         Using writer As New StreamWriter(RECENT_COUNT_FILE, False, Encoding.GetEncoding("Shift_JIS"))
-            For i As Integer = 0 To Me.recognizedDice.Length - 1
-                writer.WriteLine(String.Format("{0}", Me.recognizedDice(i)))
+            For i As Integer = 0 To Me.recognizedDiceResult.Length - 1
+                writer.WriteLine(String.Format("{0}", Me.recognizedDiceResult(i)))
             Next
         End Using
     End Sub
@@ -259,7 +262,7 @@ Public Class frmMainDice
         End Using
         If ar.Count = 6 Then
             For i As Integer = 0 To ar.Count - 1
-                Me.recognizedDice(i) = Integer.Parse(ar(i))
+                Me.recognizedDiceResult(i) = Integer.Parse(ar(i))
             Next
         End If
     End Sub
@@ -297,13 +300,16 @@ Public Class frmMainDice
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
-        If doRecognize = False Then
+        'save image instance
+        saveImage.Init()
+
+        If isRunSequence = False Then
             If oSerialPort.IsOpen() = True AndAlso m_capture IsNot Nothing Then
                 SendShoot()
                 System.Threading.Thread.Sleep(2000)
-                doRecognize = True
-                Me.count_recognize = 0
-                aveDiceValue = 0.0
+                isRunSequence = True
+                Me.countRecognize = 0
+                sumDiceValue = 0.0
 
                 btnStart.Text = "Stop"
                 btnStart.BackColor = Color.DarkRed
@@ -320,8 +326,8 @@ Public Class frmMainDice
                 Me.MAX_SLEEP_MS = 1000 'default
             End If
         Else
-            doRecognize = False
-            stateRecognize = 0
+            isRunSequence = False
+            stateRecognize = DiceRecognizeState.RECOGNIZE
 
             btnStart.Text = "Start"
             btnStart.BackColor = Color.AliceBlue
@@ -500,7 +506,7 @@ Public Class frmMainDice
 
     Private Sub tbxRecognizeParam_TextChanged(sender As Object, e As EventArgs) Handles tbxRecognizeParam.TextChanged
         UpdateRecognizeParameter()
-        Me.count_recognize = 0
+        Me.countRecognize = 0
     End Sub
 
     ''' <summary>
@@ -546,7 +552,7 @@ Public Class frmMainDice
     '/////////////////////////////////////////////////////////////////////////////////////////
     Private Sub btnDebug_Click(sender As Object, e As EventArgs) Handles btnDebug.Click
         If recognizeDice > 0 AndAlso recognizeDice < 7 Then
-            Me.recognizedDice(recognizeDice - 1) += 1
+            Me.recognizedDiceResult(recognizeDice - 1) += 1
             UpdateFrequency()
         End If
     End Sub
@@ -554,7 +560,7 @@ Public Class frmMainDice
     Private Sub InitPlot()
         Me.oPlot.Model = New OxyPlot.PlotModel("Dice Frequency")
         Me.oPlot.BackColor = Color.White
-        UpdatePlotYAxis(Me.recognizedDice.Max)
+        UpdatePlotYAxis(Me.recognizedDiceResult.Max)
     End Sub
 
     Private Sub UpdateFrequency()
@@ -563,24 +569,24 @@ Public Class frmMainDice
         End If
 
         'update Y Axis
-        UpdatePlotYAxis(Me.recognizedDice.Max)
+        UpdatePlotYAxis(Me.recognizedDiceResult.Max)
 
         'update bar
         Me.oPlot.Model.Series.Clear()
         Dim series = New OxyPlot.Series.ColumnSeries()
-        For i As Integer = 0 To Me.recognizedDice.Length - 1
-            series.Items.Add(New OxyPlot.Series.ColumnItem(Me.recognizedDice(i)))
+        For i As Integer = 0 To Me.recognizedDiceResult.Length - 1
+            series.Items.Add(New OxyPlot.Series.ColumnItem(Me.recognizedDiceResult(i)))
         Next
         Me.oPlot.Model.Series.Add(series)
         Me.oPlot.InvalidatePlot(True)
 
         'label update
-        Dim sum = Me.recognizedDice.Sum()
+        Dim sum = Me.recognizedDiceResult.Sum()
         Dim strLbl As String = String.Empty
         strLbl += String.Format("Total Shake count:{0}", sum)
         strLbl += vbCrLf
-        For i As Integer = 0 To Me.recognizedDice.Length - 1
-            strLbl += String.Format("Dice {0} : {1}", i + 1, recognizedDice(i))
+        For i As Integer = 0 To Me.recognizedDiceResult.Length - 1
+            strLbl += String.Format("Dice {0} : {1}", i + 1, recognizedDiceResult(i))
             strLbl += vbCrLf
         Next
         lblDetail.Text = strLbl
@@ -608,8 +614,8 @@ Public Class frmMainDice
     ''' <param name="e"></param>
     Private Sub btnClear_Click(sender As Object, e As EventArgs) Handles btnClear.Click
         '初期化
-        For i As Integer = 0 To Me.recognizedDice.Length - 1
-            Me.recognizedDice(i) = 0
+        For i As Integer = 0 To Me.recognizedDiceResult.Length - 1
+            Me.recognizedDiceResult(i) = 0
         Next
 
         '累積ファイルを削除
@@ -695,6 +701,7 @@ Public Class frmMainDice
     ''' <param name="frame"></param>
     Private Sub RecognizeDiceFunc(ByRef frame As IplImage)
         Dim zoomIpl As IplImage = Nothing
+        Dim clipedImage As IplImage = Nothing
         Using tempipl = clsUtil.ToGrayScale(frame)
             'クリック位置の座標取得（クリックされていない場合は0,0）
             If clickedPointOnPBX.X <> 0 AndAlso clickedPointOnPBX.Y <> 0 Then
@@ -711,14 +718,13 @@ Public Class frmMainDice
             Dim camClickedPosition As New Point(clickedPointOnPBX.X * zoomRatio, clickedPointOnPBX.Y * zoomRatio)
 
             '拡大（ハフ変換を行う場合ある程度大きい方がよい）
-            Using clipedImage = clsUtil.ClipIplROI(tempipl, camClickedPosition, CLIP_SIZE, CLIP_SIZE)
-                Me.pbxCliped.ImageIpl = clipedImage
-                Dim zoomSize = clipedImage.Size
-                zoomSize.Height = 300   '300
-                zoomSize.Width = 300    '300
-                zoomIpl = New IplImage(zoomSize, BitDepth.U8, 1)
-                Cv.Resize(clipedImage, zoomIpl, Interpolation.Cubic)
-            End Using
+            clipedImage = clsUtil.ClipIplROI(tempipl, camClickedPosition, CLIP_SIZE, CLIP_SIZE)
+            Me.pbxCliped.ImageIpl = clipedImage
+            Dim zoomSize = clipedImage.Size
+            zoomSize.Height = 300   '300
+            zoomSize.Width = 300    '300
+            zoomIpl = New IplImage(zoomSize, BitDepth.U8, 1)
+            Cv.Resize(clipedImage, zoomIpl, Interpolation.Cubic)
         End Using
 
         'for opt
@@ -738,10 +744,11 @@ Public Class frmMainDice
                     Cv.Circle(zoomIpl, Cv.Point(p.Value.Center.X, p.Value.Center.Y), p.Value.Radius, Cv.RGB(255, 0, 0))
                 Next
 
-                'Featureに表示
-                'Dim setIpl As IplImage = New IplImage(New CvSize(pbxImageFeature.Width, pbxImageFeature.Width), BitDepth.U8, 1)
-                'Cv.Resize(zoomIpl, setIpl, Interpolation.Cubic)
-                Me.pbxImageFeature.ImageIpl = zoomIpl
+                'UI側へ画像更新
+                Me.BeginInvoke(
+                    Sub()
+                        Me.pbxImageFeature.ImageIpl = zoomIpl
+                    End Sub)
 
                 '円の数＝サイコロの数
                 circleCount = circles.Total
@@ -755,50 +762,43 @@ Public Class frmMainDice
                     End Sub)
 
         'debug
-        Console.WriteLine("DiceRecognize:{0}", circleCount)
+        Console.Write("{0} ", circleCount)
+
+        'sum detect dice
+        Me.sumDiceValue += CDbl(circleCount)
 
         'dice detect using average
-        Me.count_recognize += 1
-        aveDiceValue += CDbl(circleCount)
-        If Me.count_recognize >= DICE_AVERAGE Then
-            recognizeDice = CInt(Math.Round(aveDiceValue / CDbl(DICE_AVERAGE), MidpointRounding.AwayFromZero))
+        Me.countRecognize += 1
+        If Me.countRecognize = DICE_AVERAGE Then
+            'recognize Dice
+            recognizeDice = CInt(Math.Round(sumDiceValue / CDbl(DICE_AVERAGE), MidpointRounding.AwayFromZero))
 
-            'init counter
-            Me.count_recognize = 0
-            aveDiceValue = 0.0
+            'debug
+            Console.WriteLine("")
+            Console.WriteLine("DetectDice:{0}", recognizeDice)
 
             'output label(invokeしないと例外エラー）
-            Dim failRecognize = (recognizeDice = 0) OrElse (recognizeDice > 6)
-            If failRecognize Then
-                'fail
-                Me.BeginInvoke(
+            Dim isFailRecognize = (recognizeDice = 0) OrElse (recognizeDice > 6)
+            Me.BeginInvoke(
                             Sub()
-                                lblDice.Text = "unknown"
+                                If isFailRecognize Then
+                                    lblDice.Text = "unknown"
+                                Else
+                                    lblDice.Text = "Dice is " & recognizeDice.ToString()
+                                End If
                             End Sub)
-            Else
-                'success
-                Me.BeginInvoke(
-                            Sub()
-                                lblDice.Text = "Dice is " & recognizeDice.ToString()
-                            End Sub)
-            End If
 
-            'state change
-            If doRecognize = True Then
-                stateRecognize = DiceRecognizeState.ROLLDICE
-            End If
-            If failRecognize = False AndAlso doRecognize = True Then
-                stateRecognize = 1
-                Me.recognizedDice(recognizeDice - 1) += 1 'update dice count
-                Me.recognizedDiceList.Add(recognizeDice)
+            'サイコロの目確認
+            If isFailRecognize = False AndAlso isRunSequence = True Then
+                '結果の保存
+                Me.recognizedDiceResult(recognizeDice - 1) += 1 'update dice count
+                Me.recognizedDiceResultList.Add(recognizeDice)
 
                 'スレッドからUI部の変更
                 Me.BeginInvoke(
                                 Sub()
                                     UpdateFrequency()
-                                    Dim dices = New StringBuilder()
-
-
+                                    'Dim dices = New StringBuilder()
                                     'Dim diceRecogCount = Me.recognizedDice.Count
                                     'If diceRecogCount <> 200 Then
                                     '    For i As Integer = 0 To 200 - 1
@@ -809,14 +809,28 @@ Public Class frmMainDice
                                     '        dices.Append(String.Format("{0} , ", recognizedDiceList(i)))
                                     '    Next
                                     'End If
-
                                     'recentDice.Text = dices.ToString
                                 End Sub)
 
                 '定期保存
-                If (Me.recognizedDiceList.Count Mod 50) = 0 Then
+                If (Me.recognizedDiceResultList.Count Mod 50) = 0 Then
                     SaveData()
                 End If
+
+                '画像の保存
+                If Me.cbxCollectDataset.Checked = True Then
+                    Dim tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
+                    saveImage.Save(recognizeDice, tempBmp)
+                End If
+            End If
+
+            '初期化
+            Me.countRecognize = 0
+            Me.sumDiceValue = 0.0
+
+            '次の状態へ
+            If isRunSequence = True Then
+                stateRecognize = DiceRecognizeState.ROLLDICE
             End If
         End If
     End Sub
@@ -882,9 +896,9 @@ Public Class frmMainDice
                     SendShoot("g") 'a:10, d:13(default) 
 
                     'init
-                    doRecognize = False
-                    Me.count_recognize = 0
-                    aveDiceValue = 0.0
+                    isRunSequence = False
+                    Me.countRecognize = 0
+                    sumDiceValue = 0.0
 
                     'move next state
                     stateRecognize = DiceRecognizeState.SLEEP
@@ -907,9 +921,9 @@ Public Class frmMainDice
 
                         '次の状態へ
                         elapsedSleepMs = 0
-                        doRecognize = True
-                        Me.count_recognize = 0
-                        aveDiceValue = 0.0
+                        isRunSequence = True
+                        Me.countRecognize = 0
+                        sumDiceValue = 0.0
 
                         'move next state
                         stateRecognize = DiceRecognizeState.RECOGNIZE
@@ -918,7 +932,7 @@ Public Class frmMainDice
             End Using
 
             'calc fps
-            If Me.count_recognize = 0 Then
+            If Me.countRecognize = 0 Then
                 'Console.WriteLine("{0}[FPS]", 1000.0 / sw.ElapsedMilliseconds)
             End If
 
@@ -930,6 +944,10 @@ Public Class frmMainDice
                 GC.Collect()
             End If
         End While
+    End Sub
+
+    Private Sub mStrip_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles mStrip.ItemClicked
+
     End Sub
 #End Region
 

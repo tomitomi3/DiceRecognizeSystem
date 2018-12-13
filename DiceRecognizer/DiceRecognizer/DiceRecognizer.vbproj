@@ -154,6 +154,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsSaveImage.vb" />
     <Compile Include="clsUtil.vb" />
     <Compile Include="frmMainFace.Designer.vb">
       <DependentUpon>frmMainFace.vb</DependentUpon>
