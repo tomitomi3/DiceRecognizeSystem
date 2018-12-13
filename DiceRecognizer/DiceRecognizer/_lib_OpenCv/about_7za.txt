@@ -1,0 +1,3 @@
+7za.exeは7-Zipのプログラムです。
+7-ZipはGNU LGPLのライセンスです。
+URL:www.7-zip.org
