@@ -87,15 +87,14 @@ Public Class clsUtil
     ''' <param name="ai_inputImg"></param>
     ''' <remarks></remarks>
     Public Shared Sub DetectFace(ByRef ai_inputImg As IplImage)
-        'Dim path = "..\..\..\..\_haarcascade\haarcascade_frontalface_default.xml"
-        Dim path = "C:\_bitbucket_formft2015\DiceRecognizer\_haarcascade\haarcascade_frontalface_default.xml"
+        Dim path = "..\..\..\_haarcascade\haarcascade_frontalface_default.xml"
         Using faceDetector As OpenCvSharp.CvHaarClassifierCascade = OpenCvSharp.Cv.Load(Of OpenCvSharp.CvHaarClassifierCascade)(path)
             Using cvMem As New OpenCvSharp.CvMemStorage
                 Using imgGray As New OpenCvSharp.IplImage(ai_inputImg.Size, OpenCvSharp.BitDepth.U8, 1)
                     OpenCvSharp.Cv.CvtColor(ai_inputImg, imgGray, OpenCvSharp.ColorConversion.BgrToGray)
                     OpenCvSharp.Cv.EqualizeHist(imgGray, imgGray)
                     cvMem.Clear()
-                    For Each face In OpenCvSharp.Cv.HaarDetectObjects( _
+                    For Each face In OpenCvSharp.Cv.HaarDetectObjects(
                                             ai_inputImg,
                                             faceDetector,
                                             cvMem,
