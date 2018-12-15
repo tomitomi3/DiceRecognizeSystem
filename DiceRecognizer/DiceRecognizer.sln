@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "DiceRecognizer", "DiceRecognizer\DiceRecognizer.vbproj", "{C352D3E1-C1E0-46A0-93A7-8B481BA9E638}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "CheckExitStatus", "CheckExitStatus\CheckExitStatus.vbproj", "{6E355805-2BB8-4BB6-934F-9FA24041E9EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{C352D3E1-C1E0-46A0-93A7-8B481BA9E638}.Release|x64.Build.0 = Release|x64
 		{C352D3E1-C1E0-46A0-93A7-8B481BA9E638}.Release|x86.ActiveCfg = Release|x86
 		{C352D3E1-C1E0-46A0-93A7-8B481BA9E638}.Release|x86.Build.0 = Release|x86
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|x64.Build.0 = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Debug|x86.Build.0 = Debug|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|x64.ActiveCfg = Release|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|x64.Build.0 = Release|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|x86.ActiveCfg = Release|Any CPU
+		{6E355805-2BB8-4BB6-934F-9FA24041E9EC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -71,6 +71,8 @@ Partial Class frmMainDice
         Me.btnOneshotCollect = New System.Windows.Forms.Button()
         Me.tbxSleepMs = New System.Windows.Forms.TextBox()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.btnProcess = New System.Windows.Forms.Button()
+        Me.Label6 = New System.Windows.Forms.Label()
         CType(Me.pbxCamRawImg, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mStrip.SuspendLayout()
         CType(Me.pbxCliped, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -317,7 +319,7 @@ Partial Class frmMainDice
         '
         'btnOpt
         '
-        Me.btnOpt.Location = New System.Drawing.Point(953, 280)
+        Me.btnOpt.Location = New System.Drawing.Point(953, 226)
         Me.btnOpt.Name = "btnOpt"
         Me.btnOpt.Size = New System.Drawing.Size(75, 23)
         Me.btnOpt.TabIndex = 27
@@ -326,7 +328,7 @@ Partial Class frmMainDice
         '
         'tbxCorrect
         '
-        Me.tbxCorrect.Location = New System.Drawing.Point(877, 282)
+        Me.tbxCorrect.Location = New System.Drawing.Point(877, 228)
         Me.tbxCorrect.Name = "tbxCorrect"
         Me.tbxCorrect.Size = New System.Drawing.Size(70, 19)
         Me.tbxCorrect.TabIndex = 26
@@ -335,7 +337,7 @@ Partial Class frmMainDice
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.Label1.Location = New System.Drawing.Point(788, 268)
+        Me.Label1.Location = New System.Drawing.Point(788, 214)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(109, 12)
         Me.Label1.TabIndex = 25
@@ -504,11 +506,32 @@ Partial Class frmMainDice
         Me.Label5.TabIndex = 36
         Me.Label5.Text = "Sleep[ms]:"
         '
+        'btnProcess
+        '
+        Me.btnProcess.Location = New System.Drawing.Point(877, 279)
+        Me.btnProcess.Name = "btnProcess"
+        Me.btnProcess.Size = New System.Drawing.Size(151, 23)
+        Me.btnProcess.TabIndex = 37
+        Me.btnProcess.Text = "ProcessCheck"
+        Me.btnProcess.UseVisualStyleBackColor = True
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
+        Me.Label6.Location = New System.Drawing.Point(788, 264)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(118, 12)
+        Me.Label6.TabIndex = 38
+        Me.Label6.Text = "Other recognition algo"
+        '
         'frmMainDice
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1398, 804)
+        Me.Controls.Add(Me.Label6)
+        Me.Controls.Add(Me.btnProcess)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.tbxSleepMs)
         Me.Controls.Add(Me.btnOneshotCollect)
@@ -613,4 +636,6 @@ Partial Class frmMainDice
     Friend WithEvents btnOneshotCollect As Button
     Friend WithEvents tbxSleepMs As TextBox
     Friend WithEvents Label5 As Label
+    Friend WithEvents btnProcess As Button
+    Friend WithEvents Label6 As Label
 End Class

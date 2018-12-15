@@ -61,6 +61,9 @@ Public Class frmMainDice
         SLEEP = 2
     End Enum
 
+    '直近の認識画像
+    Private recentBmp As Bitmap = Nothing
+
     'クリップサイズ
     Private CLIP_SIZE = 128
 
@@ -509,15 +512,6 @@ Public Class frmMainDice
         Me.countRecognize = 0
     End Sub
 
-    ''' <summary>
-    ''' サイコロ認識画像の保存(デバッグ用)
-    ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub btnOneshotCollect_Click(sender As Object, e As EventArgs) Handles btnOneshotCollect.Click
-
-    End Sub
-
     '/////////////////////////////////////////////////////////////////////////////////////////
     'シリアルポート
     '/////////////////////////////////////////////////////////////////////////////////////////
@@ -727,6 +721,11 @@ Public Class frmMainDice
             Cv.Resize(clipedImage, zoomIpl, Interpolation.Cubic)
         End Using
 
+        'Recent クリップ画像
+        SyncLock objlock
+            Me.recentBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
+        End SyncLock
+
         'for opt
         Me.copyIPL = Cv.CloneImage(zoomIpl)
 
@@ -818,8 +817,9 @@ Public Class frmMainDice
                 End If
 
                 '画像の保存
+                Dim tempBmp As Bitmap = Nothing
                 If Me.cbxCollectDataset.Checked = True Then
-                    Dim tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
+                    tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
                     saveImage.Save(recognizeDice, tempBmp)
                 End If
             End If
@@ -946,8 +946,57 @@ Public Class frmMainDice
         End While
     End Sub
 
-    Private Sub mStrip_ItemClicked(sender As Object, e As ToolStripItemClickedEventArgs) Handles mStrip.ItemClicked
+    ''' <summary>
+    ''' サイコロ認識画像の保存(デバッグ用)
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub btnOneshotCollect_Click(sender As Object, e As EventArgs) Handles btnOneshotCollect.Click
+        SyncLock objlock
+            If recentBmp IsNot Nothing Then
+                Me.recentBmp.Save("test.bmp")
+            End If
+        End SyncLock
+    End Sub
 
+    ''' <summary>
+    ''' プロセス起動
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub btnProcess_Click(sender As Object, e As EventArgs) Handles btnProcess.Click
+        Console.WriteLine("Check Start Process")
+
+        'スレッドの共有資源をロックしてから実行
+        SyncLock objlock
+            If recentBmp IsNot Nothing Then
+                '直近の画像を保存
+                Me.recentBmp.Save("test.bmp")
+
+                '同期で呼び出し
+
+                'テスト用プログラム
+                Dim programPath = "..\..\..\CheckExitStatus\bin\Debug\CheckExitStatus.exe"
+                Dim imgPath = "test.bmp"
+
+                Dim commandStr = String.Format("{0} {1}", programPath, imgPath)
+
+                'プロセス起動
+                Dim psi As New System.Diagnostics.ProcessStartInfo
+                psi.FileName = programPath
+                'psi.Arguments = "test"
+                'psi.Arguments = imgPath
+                Dim p = System.Diagnostics.Process.Start(psi)
+                p.WaitForExit()
+
+                '終了コード取得
+                If p.ExitCode = -1 Then
+                    Console.WriteLine(" Exit code : {0}", p.ExitCode)
+                Else
+                    Console.WriteLine(" Exit code : {0}", p.ExitCode)
+                End If
+            End If
+        End SyncLock
     End Sub
 #End Region
 
