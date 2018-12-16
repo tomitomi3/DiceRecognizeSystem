@@ -689,6 +689,35 @@ Public Class frmMainDice
                     )
     End Sub
 
+    Private Sub UpdateAddResultAndFrequency()
+        '結果の保存
+        Me.recognizedDiceResult(recognizeDice - 1) += 1 'update dice count
+        Me.recognizedDiceResultList.Add(recognizeDice)
+
+        'スレッドからUI部の変更
+        Me.BeginInvoke(
+                                Sub()
+                                    UpdateFrequency()
+                                    'Dim dices = New StringBuilder()
+                                    'Dim diceRecogCount = Me.recognizedDice.Count
+                                    'If diceRecogCount <> 200 Then
+                                    '    For i As Integer = 0 To 200 - 1
+                                    '        dices.Append(String.Format("{0} , ", recognizedDiceList(i)))
+                                    '    Next
+                                    'Else
+                                    '    For i As Integer = diceRecogCount - 200 To 200 - 1
+                                    '        dices.Append(String.Format("{0} , ", recognizedDiceList(i)))
+                                    '    Next
+                                    'End If
+                                    'recentDice.Text = dices.ToString
+                                End Sub)
+
+        '定期保存
+        If (Me.recognizedDiceResultList.Count Mod 50) = 0 Then
+            SaveData()
+        End If
+    End Sub
+
     ''' <summary>
     ''' サイコロ認識
     ''' </summary>
@@ -729,108 +758,146 @@ Public Class frmMainDice
         'for opt
         Me.copyIPL = Cv.CloneImage(zoomIpl)
 
-        'ハフ変換によるサイコロの目の読み取り認識
-        Dim circleCount As Integer = 0
-        Using storage = Cv.CreateMemStorage(0)
-            'minDist – 検出される円の中心同士の最小距離．このパラメータが小さすぎると，正しい円の周辺に別の円が複数誤って検出されることになります．逆に大きすぎると，検出できない円がでてくる可能性があります．
-            'param1 – 手法依存の 1 番目のパラメータ． CV_HOUGH_GRADIENT の場合は， Canny() エッジ検出器に渡される2つの閾値の内，大きい方の閾値を表します（小さい閾値は，この値の半分になります）．
-            'param2 – 手法依存の 2 番目のパラメータ． CV_HOUGH_GRADIENT の場合は，円の中心を検出する際の投票数の閾値を表します．これが小さくなるほど，より多くの誤検出が起こる可能性があります．より多くの投票を獲得した円が，最初に出力されます．
-            'minRadius – 円の半径の最小値．
-            'maxRadius – 円の半径の最大値．
-            Using circles = Cv.HoughCircles(zoomIpl, storage, HoughCirclesMethod.Gradient, 1, minDist, p1, p2, minRadius, maxRadius)
-                For i = 0 To circles.Total - 1
-                    Dim p = Cv.GetSeqElem(circles, i)
-                    Cv.Circle(zoomIpl, Cv.Point(p.Value.Center.X, p.Value.Center.Y), p.Value.Radius, Cv.RGB(255, 0, 0))
-                Next
-
-                'UI側へ画像更新
-                Me.BeginInvoke(
-                    Sub()
-                        Me.pbxImageFeature.ImageIpl = zoomIpl
-                    End Sub)
-
-                '円の数＝サイコロの数
-                circleCount = circles.Total
-            End Using
-        End Using
-
         'status label
         Me.BeginInvoke(
                     Sub()
                         lblState.Text = "Recognize..."
                     End Sub)
 
-        'debug
-        Console.Write("{0} ", circleCount)
-
-        'sum detect dice
-        Me.sumDiceValue += CDbl(circleCount)
-
-        'dice detect using average
-        Me.countRecognize += 1
-        If Me.countRecognize = DICE_AVERAGE Then
-            'recognize Dice
-            recognizeDice = CInt(Math.Round(sumDiceValue / CDbl(DICE_AVERAGE), MidpointRounding.AwayFromZero))
-
-            'debug
-            Console.WriteLine("")
-            Console.WriteLine("DetectDice:{0}", recognizeDice)
-
-            'output label(invokeしないと例外エラー）
-            Dim isFailRecognize = (recognizeDice = 0) OrElse (recognizeDice > 6)
+        'サイコロの目を認識
+        If Me.cbxIsUseDNN.Checked = True Then
+            'UI側へ画像更新
             Me.BeginInvoke(
-                            Sub()
-                                If isFailRecognize Then
-                                    lblDice.Text = "unknown"
-                                Else
-                                    lblDice.Text = "Dice is " & recognizeDice.ToString()
-                                End If
-                            End Sub)
+                    Sub()
+                        Me.pbxImageFeature.ImageIpl = zoomIpl
+                    End Sub)
 
-            'サイコロの目確認
-            If isFailRecognize = False AndAlso isRunSequence = True Then
-                '結果の保存
-                Me.recognizedDiceResult(recognizeDice - 1) += 1 'update dice count
-                Me.recognizedDiceResultList.Add(recognizeDice)
+            'DNNを用いた認識
+            Dim tempRecognize = New clsRecognizeUsingCNN(Me.objlock)
+            Dim ret = tempRecognize.DiceRecognize(Me.recentBmp)
 
-                'スレッドからUI部の変更
+            '結果の判定
+            If ret = clsRecognizeUsingCNN.ReturnCode.RecognizeError Then
+                'nop error
+                'update UI
                 Me.BeginInvoke(
-                                Sub()
-                                    UpdateFrequency()
-                                    'Dim dices = New StringBuilder()
-                                    'Dim diceRecogCount = Me.recognizedDice.Count
-                                    'If diceRecogCount <> 200 Then
-                                    '    For i As Integer = 0 To 200 - 1
-                                    '        dices.Append(String.Format("{0} , ", recognizedDiceList(i)))
-                                    '    Next
-                                    'Else
-                                    '    For i As Integer = diceRecogCount - 200 To 200 - 1
-                                    '        dices.Append(String.Format("{0} , ", recognizedDiceList(i)))
-                                    '    Next
-                                    'End If
-                                    'recentDice.Text = dices.ToString
-                                End Sub)
+                         Sub()
+                             lblDice.Text = "Unknown"
+                         End Sub)
+            Else
+                'success recognize
 
-                '定期保存
-                If (Me.recognizedDiceResultList.Count Mod 50) = 0 Then
-                    SaveData()
+                '結果の格納
+                Me.recognizeDice = ret + 1
+
+                'update UI
+                Me.BeginInvoke(
+                         Sub()
+                             lblDice.Text = "Dice is " & recognizeDice.ToString()
+                         End Sub)
+
+                'debug
+                Console.WriteLine("")
+                Console.WriteLine("DetectDice:{0}", recognizeDice)
+
+                'sequence
+                If isRunSequence = True Then
+                    'サイコロ
+                    UpdateAddResultAndFrequency()
+
+                    '画像の保存
+                    Dim tempBmp As Bitmap = Nothing
+                    If Me.cbxCollectDataset.Checked = True Then
+                        tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
+                        saveImage.Save(recognizeDice, tempBmp)
+                    End If
                 End If
 
-                '画像の保存
-                Dim tempBmp As Bitmap = Nothing
-                If Me.cbxCollectDataset.Checked = True Then
-                    tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
-                    saveImage.Save(recognizeDice, tempBmp)
+                '初期化
+                Me.countRecognize = 0
+                Me.sumDiceValue = 0.0
+
+                '次の状態へ
+                If isRunSequence = True Then
+                    stateRecognize = DiceRecognizeState.ROLLDICE
                 End If
             End If
+        Else
+            '--------------------------------------------------------
+            'ハフ変換によるサイコロの目の読み取り認識
+            '--------------------------------------------------------
+            Dim circleCount As Integer = 0
+            Using storage = Cv.CreateMemStorage(0)
+                'minDist – 検出される円の中心同士の最小距離．このパラメータが小さすぎると，正しい円の周辺に別の円が複数誤って検出されることになります．逆に大きすぎると，検出できない円がでてくる可能性があります．
+                'param1 – 手法依存の 1 番目のパラメータ． CV_HOUGH_GRADIENT の場合は， Canny() エッジ検出器に渡される2つの閾値の内，大きい方の閾値を表します（小さい閾値は，この値の半分になります）．
+                'param2 – 手法依存の 2 番目のパラメータ． CV_HOUGH_GRADIENT の場合は，円の中心を検出する際の投票数の閾値を表します．これが小さくなるほど，より多くの誤検出が起こる可能性があります．より多くの投票を獲得した円が，最初に出力されます．
+                'minRadius – 円の半径の最小値．
+                'maxRadius – 円の半径の最大値．
+                Using circles = Cv.HoughCircles(zoomIpl, storage, HoughCirclesMethod.Gradient, 1, minDist, p1, p2, minRadius, maxRadius)
+                    For i = 0 To circles.Total - 1
+                        Dim p = Cv.GetSeqElem(circles, i)
+                        Cv.Circle(zoomIpl, Cv.Point(p.Value.Center.X, p.Value.Center.Y), p.Value.Radius, Cv.RGB(255, 0, 0))
+                    Next
 
-            '初期化
-            Me.countRecognize = 0
-            Me.sumDiceValue = 0.0
+                    'UI側へ画像更新
+                    Me.BeginInvoke(
+                    Sub()
+                        Me.pbxImageFeature.ImageIpl = zoomIpl
+                    End Sub)
 
-            '次の状態へ
-            If isRunSequence = True Then
-                stateRecognize = DiceRecognizeState.ROLLDICE
+                    '円の数＝サイコロの数
+                    circleCount = circles.Total
+                End Using
+            End Using
+
+            'debug
+            Console.Write("{0} ", circleCount)
+
+            'sum detect dice
+            Me.sumDiceValue += CDbl(circleCount)
+
+            'dice detect using average
+            Me.countRecognize += 1
+            If Me.countRecognize = DICE_AVERAGE Then
+                'recognize Dice
+                Me.recognizeDice = CInt(Math.Round(sumDiceValue / CDbl(DICE_AVERAGE), MidpointRounding.AwayFromZero))
+
+                'debug
+                Console.WriteLine("")
+                Console.WriteLine("DetectDice:{0}", recognizeDice)
+
+                'output label(invokeしないと例外エラー）
+                Dim isFailRecognize = (recognizeDice = 0) OrElse (recognizeDice > 6)
+                Me.BeginInvoke(
+                                Sub()
+                                    If isFailRecognize Then
+                                        lblDice.Text = "unknown"
+                                    Else
+                                        lblDice.Text = "Dice is " & recognizeDice.ToString()
+                                    End If
+                                End Sub)
+
+                'サイコロの目確認
+                If isFailRecognize = False AndAlso isRunSequence = True Then
+                    'サイコロ
+                    UpdateAddResultAndFrequency()
+
+                    '画像の保存
+                    Dim tempBmp As Bitmap = Nothing
+                    If Me.cbxCollectDataset.Checked = True Then
+                        tempBmp = OpenCvSharp.Extensions.BitmapConverter.ToBitmap(clipedImage)
+                        saveImage.Save(recognizeDice, tempBmp)
+                    End If
+                End If
+
+                '初期化
+                Me.countRecognize = 0
+                Me.sumDiceValue = 0.0
+
+                '次の状態へ
+                If isRunSequence = True Then
+                    stateRecognize = DiceRecognizeState.ROLLDICE
+                End If
             End If
         End If
     End Sub
@@ -965,39 +1032,24 @@ Public Class frmMainDice
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     Private Sub btnProcess_Click(sender As Object, e As EventArgs) Handles btnProcess.Click
-        Console.WriteLine("Check Start Process")
+        Console.WriteLine(" Return Result : {0}", (New clsRecognizeUsingCNN(Me.objlock)).DiceRecognize(Me.recentBmp))
+    End Sub
 
-        'スレッドの共有資源をロックしてから実行
-        SyncLock objlock
-            If recentBmp IsNot Nothing Then
-                '直近の画像を保存
-                Me.recentBmp.Save("test.bmp")
+    ''' <summary>
+    ''' using cnnd checked
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub cbxIsUseDNN_CheckedChanged(sender As Object, e As EventArgs) Handles cbxIsUseDNN.CheckedChanged
+        If cbxIsUseDNN.Checked = True Then
+            Dim msg As String = String.Empty
+            msg += String.Format("example_predict.pyの起動を確認してください。" & Environment.NewLine)
+            msg += String.Format("clsRecognizeUsingCNN内のコマンド軌道を確認してください。" & Environment.NewLine)
+            msg += String.Format(Environment.NewLine)
+            msg += String.Format("https://github.com/tomitomi3/DiceRecognitionDatasetForML" & Environment.NewLine)
 
-                '同期で呼び出し
-
-                'テスト用プログラム
-                Dim programPath = "..\..\..\CheckExitStatus\bin\Debug\CheckExitStatus.exe"
-                Dim imgPath = "test.bmp"
-
-                Dim commandStr = String.Format("{0} {1}", programPath, imgPath)
-
-                'プロセス起動
-                Dim psi As New System.Diagnostics.ProcessStartInfo
-                psi.FileName = programPath
-                'psi.Arguments = "test"
-                'psi.Arguments = imgPath
-                Dim p = System.Diagnostics.Process.Start(psi)
-                p.WaitForExit()
-
-                '終了コード取得
-                If p.ExitCode = -1 Then
-                    Console.WriteLine(" Exit code : {0}", p.ExitCode)
-                Else
-                    Console.WriteLine(" Exit code : {0}", p.ExitCode)
-                End If
-            End If
-        End SyncLock
+            MessageBox.Show(msg)
+        End If
     End Sub
 #End Region
-
 End Class

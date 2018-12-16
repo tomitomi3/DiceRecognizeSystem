@@ -73,6 +73,7 @@ Partial Class frmMainDice
         Me.Label5 = New System.Windows.Forms.Label()
         Me.btnProcess = New System.Windows.Forms.Button()
         Me.Label6 = New System.Windows.Forms.Label()
+        Me.cbxIsUseDNN = New System.Windows.Forms.CheckBox()
         CType(Me.pbxCamRawImg, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.mStrip.SuspendLayout()
         CType(Me.pbxCliped, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -508,28 +509,39 @@ Partial Class frmMainDice
         '
         'btnProcess
         '
-        Me.btnProcess.Location = New System.Drawing.Point(877, 279)
+        Me.btnProcess.Location = New System.Drawing.Point(953, 286)
         Me.btnProcess.Name = "btnProcess"
-        Me.btnProcess.Size = New System.Drawing.Size(151, 23)
+        Me.btnProcess.Size = New System.Drawing.Size(99, 23)
         Me.btnProcess.TabIndex = 37
-        Me.btnProcess.Text = "ProcessCheck"
+        Me.btnProcess.Text = "DebugOneShot"
         Me.btnProcess.UseVisualStyleBackColor = True
         '
         'Label6
         '
         Me.Label6.AutoSize = True
         Me.Label6.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.Label6.Location = New System.Drawing.Point(788, 264)
+        Me.Label6.Location = New System.Drawing.Point(788, 265)
         Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(118, 12)
+        Me.Label6.Size = New System.Drawing.Size(116, 12)
         Me.Label6.TabIndex = 38
-        Me.Label6.Text = "Other recognition algo"
+        Me.Label6.Text = "Recognize using CNN"
+        '
+        'cbxIsUseDNN
+        '
+        Me.cbxIsUseDNN.AutoSize = True
+        Me.cbxIsUseDNN.Location = New System.Drawing.Point(877, 290)
+        Me.cbxIsUseDNN.Name = "cbxIsUseDNN"
+        Me.cbxIsUseDNN.Size = New System.Drawing.Size(77, 16)
+        Me.cbxIsUseDNN.TabIndex = 39
+        Me.cbxIsUseDNN.Text = "UsingDNN"
+        Me.cbxIsUseDNN.UseVisualStyleBackColor = True
         '
         'frmMainDice
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(1398, 804)
+        Me.Controls.Add(Me.cbxIsUseDNN)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.btnProcess)
         Me.Controls.Add(Me.Label5)
@@ -638,4 +650,5 @@ Partial Class frmMainDice
     Friend WithEvents Label5 As Label
     Friend WithEvents btnProcess As Button
     Friend WithEvents Label6 As Label
+    Friend WithEvents cbxIsUseDNN As CheckBox
 End Class
