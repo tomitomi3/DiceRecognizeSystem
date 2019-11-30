@@ -61,6 +61,9 @@ Public Class frmMainDice
         SLEEP = 2
     End Enum
 
+    'ON duration for DICE Shoot
+    Public SHOOT_PARAM As String = "6" '9V
+
     '直近の認識画像
     Private recentBmp As Bitmap = Nothing
 
@@ -154,14 +157,14 @@ Public Class frmMainDice
         End If
 
         'カメラ
-        btnCamOpen.PerformClick()
+        'btnCamOpen.PerformClick()
 
         '結果の読み込み
         LoadResult()
 
         'クリック位置
-        Me.clickedPointOnPBX.X = 128
-        Me.clickedPointOnPBX.Y = 94
+        Me.clickedPointOnPBX.X = 134
+        Me.clickedPointOnPBX.Y = 92
 
         'plot
         InitPlot()
@@ -278,6 +281,9 @@ Public Class frmMainDice
     ''' <remarks></remarks>
     Private Sub btnCamOpen_Click(sender As Object, e As EventArgs) Handles btnCamOpen.Click
         'cam id
+        If Me.cbxCamID.SelectedItem Is Nothing Then
+            Return
+        End If
         Dim camId As Integer = CInt(Me.cbxCamID.SelectedItem.ToString())
 
         'open
@@ -308,7 +314,7 @@ Public Class frmMainDice
 
         If isRunSequence = False Then
             If oSerialPort.IsOpen() = True AndAlso m_capture IsNot Nothing Then
-                SendShoot()
+                SendShoot(SHOOT_PARAM)
                 System.Threading.Thread.Sleep(2000)
                 isRunSequence = True
                 Me.countRecognize = 0
@@ -484,7 +490,7 @@ Public Class frmMainDice
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     Private Sub btnSend_Click(sender As Object, e As EventArgs) Handles btnSend.Click
-        SendShoot("d")
+        SendShoot(SHOOT_PARAM)
     End Sub
 
     Private Sub tbxMinDist_TextChanged(sender As Object, e As EventArgs) Handles tbxMinDist.TextChanged
@@ -960,7 +966,7 @@ Public Class frmMainDice
                             lblState.Text = "Shoot..."
                         End Sub)
 
-                    SendShoot("g") 'a:10, d:13(default) 
+                    SendShoot(SHOOT_PARAM) 'a:10, d:13(default) 
 
                     'init
                     isRunSequence = False
