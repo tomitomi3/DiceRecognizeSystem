@@ -93,18 +93,19 @@ Public Class frmMainDice
         'list of Camera id
         Dim camIds As New List(Of Integer)
         For i As Integer = 0 To 10 - 1
-            Dim temp As CvCapture = Nothing
-            Try
-                temp = Cv.CreateCameraCapture(i)
-                camIds.Add(i)
-                Console.WriteLine("Detect Camera ID:{0}", i)
-            Catch ex As Exception
-                'Exit For
-            Finally
-                If temp IsNot Nothing Then
-                    temp.Dispose()
-                End If
-            End Try
+            camIds.Add(i)
+            'Dim temp As CvCapture = Nothing
+            'Try
+            '    temp = Cv.CreateCameraCapture(i)
+            '    camIds.Add(i)
+            '    Console.WriteLine("Detect Camera ID:{0}", i)
+            'Catch ex As Exception
+            '    'Exit For
+            'Finally
+            '    If temp IsNot Nothing Then
+            '        temp.Dispose()
+            '    End If
+            'End Try
         Next
 
         tbxRecognizeParam.Text = Me.DICE_AVERAGE.ToString()
@@ -143,7 +144,7 @@ Public Class frmMainDice
         LoadParameter()
 
         'recognize parameters
-        Me.tbxSleepMs.Text = MAX_SLEEP_MS.ToString()
+        'Me.tbxSleepMs.Text = MAX_SLEEP_MS.ToString()
 
         'SerialPort
         Dim ports = System.IO.Ports.SerialPort.GetPortNames()
@@ -209,6 +210,7 @@ Public Class frmMainDice
             writer.WriteLine(String.Format("{0}", tbxMinRadius.Text))
             writer.WriteLine(String.Format("{0}", tbxMaxRadius.Text))
             writer.WriteLine(String.Format("{0}", tbxRecognizeParam.Text))
+            writer.WriteLine(String.Format("{0}", tbxSleepMs.Text))
         End Using
 
         Using writer As New StreamWriter(RECENT_COUNT_FILE, False, Encoding.GetEncoding("Shift_JIS"))
@@ -241,6 +243,7 @@ Public Class frmMainDice
         tbxMinRadius.Text = ar(3)
         tbxMaxRadius.Text = ar(4)
         tbxRecognizeParam.Text = ar(5)
+        tbxSleepMs.Text = ar(6)
 
         Me.minDist = Double.Parse(Me.tbxMinDist.Text)
         Me.p1 = Double.Parse(Me.tbxP1.Text)
@@ -309,9 +312,6 @@ Public Class frmMainDice
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     Private Sub btnStart_Click(sender As Object, e As EventArgs) Handles btnStart.Click
-        'save image instance
-        saveImage.Init()
-
         If isRunSequence = False Then
             If oSerialPort.IsOpen() = True AndAlso m_capture IsNot Nothing Then
                 SendShoot(SHOOT_PARAM)
@@ -323,6 +323,9 @@ Public Class frmMainDice
                 btnStart.Text = "Stop"
                 btnStart.BackColor = Color.DarkRed
             End If
+
+            'save image instance
+            saveImage.Init()
 
             'reset values
             stateRecognize = DiceRecognizeState.RECOGNIZE
@@ -748,7 +751,10 @@ Public Class frmMainDice
 
             '拡大（ハフ変換を行う場合ある程度大きい方がよい）
             clipedImage = clsUtil.ClipIplROI(tempipl, camClickedPosition, CLIP_SIZE, CLIP_SIZE)
-            Me.pbxCliped.ImageIpl = clipedImage
+            Me.BeginInvoke(
+                    Sub()
+                        Me.pbxCliped.ImageIpl = clipedImage
+                    End Sub)
             Dim zoomSize = clipedImage.Size
             zoomSize.Height = 300   '300
             zoomSize.Width = 300    '300
@@ -1010,7 +1016,7 @@ Public Class frmMainDice
             End If
 
             'カメラ画像取得タイミング調整　コメントアウトすると最速
-            Threading.Thread.Sleep(1)
+            Threading.Thread.Sleep(10)
 
             'ガーベージコレクト　これをしないとメモリがたまりつづける。
             If GC.GetTotalMemory(False) > 1024 * 1024 * 128 Then

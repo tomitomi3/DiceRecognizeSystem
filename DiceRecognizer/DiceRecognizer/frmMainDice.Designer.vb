@@ -116,7 +116,7 @@ Partial Class frmMainDice
         Me.mStrip.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuToolStripMenuItem})
         Me.mStrip.Location = New System.Drawing.Point(0, 0)
         Me.mStrip.Name = "mStrip"
-        Me.mStrip.Size = New System.Drawing.Size(1398, 24)
+        Me.mStrip.Size = New System.Drawing.Size(1184, 24)
         Me.mStrip.TabIndex = 0
         Me.mStrip.Text = "MenuStrip1"
         '
@@ -353,7 +353,7 @@ Partial Class frmMainDice
         Me.oPlot.Location = New System.Drawing.Point(3, 15)
         Me.oPlot.Name = "oPlot"
         Me.oPlot.PanCursor = System.Windows.Forms.Cursors.Hand
-        Me.oPlot.Size = New System.Drawing.Size(816, 315)
+        Me.oPlot.Size = New System.Drawing.Size(602, 315)
         Me.oPlot.TabIndex = 0
         Me.oPlot.Text = "oPlot"
         Me.oPlot.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE
@@ -363,7 +363,7 @@ Partial Class frmMainDice
         'btnDebug
         '
         Me.btnDebug.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnDebug.Location = New System.Drawing.Point(1279, 87)
+        Me.btnDebug.Location = New System.Drawing.Point(1065, 87)
         Me.btnDebug.Name = "btnDebug"
         Me.btnDebug.Size = New System.Drawing.Size(75, 23)
         Me.btnDebug.TabIndex = 3
@@ -384,7 +384,7 @@ Partial Class frmMainDice
         Me.lblDetail.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.lblDetail.AutoSize = True
         Me.lblDetail.Font = New System.Drawing.Font("MS UI Gothic", 32.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.lblDetail.Location = New System.Drawing.Point(828, 15)
+        Me.lblDetail.Location = New System.Drawing.Point(614, 15)
         Me.lblDetail.Name = "lblDetail"
         Me.lblDetail.Size = New System.Drawing.Size(332, 43)
         Me.lblDetail.TabIndex = 1
@@ -401,14 +401,14 @@ Partial Class frmMainDice
         Me.GroupBox1.Controls.Add(Me.oPlot)
         Me.GroupBox1.Location = New System.Drawing.Point(14, 382)
         Me.GroupBox1.Name = "GroupBox1"
-        Me.GroupBox1.Size = New System.Drawing.Size(1371, 336)
+        Me.GroupBox1.Size = New System.Drawing.Size(1157, 336)
         Me.GroupBox1.TabIndex = 29
         Me.GroupBox1.TabStop = False
         '
         'btnClear
         '
         Me.btnClear.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnClear.Location = New System.Drawing.Point(1279, 58)
+        Me.btnClear.Location = New System.Drawing.Point(1065, 58)
         Me.btnClear.Name = "btnClear"
         Me.btnClear.Size = New System.Drawing.Size(75, 23)
         Me.btnClear.TabIndex = 2
@@ -419,7 +419,7 @@ Partial Class frmMainDice
         '
         Me.Label2.AutoSize = True
         Me.Label2.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.Label2.Location = New System.Drawing.Point(1009, 80)
+        Me.Label2.Location = New System.Drawing.Point(970, 80)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(111, 12)
         Me.Label2.TabIndex = 22
@@ -427,7 +427,7 @@ Partial Class frmMainDice
         '
         'tbxRecognizeParam
         '
-        Me.tbxRecognizeParam.Location = New System.Drawing.Point(1126, 77)
+        Me.tbxRecognizeParam.Location = New System.Drawing.Point(1087, 77)
         Me.tbxRecognizeParam.Name = "tbxRecognizeParam"
         Me.tbxRecognizeParam.Size = New System.Drawing.Size(70, 19)
         Me.tbxRecognizeParam.TabIndex = 23
@@ -454,7 +454,7 @@ Partial Class frmMainDice
         '
         Me.GroupBox2.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.GroupBox2.Controls.Add(Me.recentDice)
-        Me.GroupBox2.Location = New System.Drawing.Point(14, 724)
+        Me.GroupBox2.Location = New System.Drawing.Point(-200, 724)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(1371, 68)
         Me.GroupBox2.TabIndex = 32
@@ -492,7 +492,7 @@ Partial Class frmMainDice
         '
         'tbxSleepMs
         '
-        Me.tbxSleepMs.Location = New System.Drawing.Point(1126, 102)
+        Me.tbxSleepMs.Location = New System.Drawing.Point(1087, 102)
         Me.tbxSleepMs.Name = "tbxSleepMs"
         Me.tbxSleepMs.Size = New System.Drawing.Size(70, 19)
         Me.tbxSleepMs.TabIndex = 35
@@ -501,7 +501,7 @@ Partial Class frmMainDice
         '
         Me.Label5.AutoSize = True
         Me.Label5.Font = New System.Drawing.Font("MS UI Gothic", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(128, Byte))
-        Me.Label5.Location = New System.Drawing.Point(1009, 105)
+        Me.Label5.Location = New System.Drawing.Point(970, 105)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(58, 12)
         Me.Label5.TabIndex = 36
@@ -540,7 +540,7 @@ Partial Class frmMainDice
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1398, 804)
+        Me.ClientSize = New System.Drawing.Size(1184, 804)
         Me.Controls.Add(Me.cbxIsUseDNN)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.btnProcess)
