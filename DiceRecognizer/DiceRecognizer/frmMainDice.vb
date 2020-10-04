@@ -18,6 +18,7 @@ Public Class frmMainDice
     Private clickedPointOnPBX As New Point(0, 0)
 
     Private countRecognize As Integer = 0
+    Private errorCountRecognize As Integer = 0
     Private sumDiceValue As Double = 0
 
     Private RECENT_COUNT_FILE As String = "RecentDiceCount.txt"
@@ -62,7 +63,7 @@ Public Class frmMainDice
     End Enum
 
     'ON duration for DICE Shoot
-    Public SHOOT_PARAM As String = "6" '9V
+    Public SHOOT_PARAM As String = "7" '9V　6->7
 
     '直近の認識画像
     Private recentBmp As Bitmap = Nothing
@@ -318,6 +319,7 @@ Public Class frmMainDice
                 System.Threading.Thread.Sleep(2000)
                 isRunSequence = True
                 Me.countRecognize = 0
+                Me.errorCountRecognize = 0
                 sumDiceValue = 0.0
 
                 btnStart.Text = "Stop"
@@ -519,6 +521,7 @@ Public Class frmMainDice
     Private Sub tbxRecognizeParam_TextChanged(sender As Object, e As EventArgs) Handles tbxRecognizeParam.TextChanged
         UpdateRecognizeParameter()
         Me.countRecognize = 0
+        Me.errorCountRecognize = 0
     End Sub
 
     '/////////////////////////////////////////////////////////////////////////////////////////
@@ -827,6 +830,7 @@ Public Class frmMainDice
 
                 '初期化
                 Me.countRecognize = 0
+                Me.errorCountRecognize = 0
                 Me.sumDiceValue = 0.0
 
                 '次の状態へ
@@ -865,29 +869,39 @@ Public Class frmMainDice
             'debug
             Console.Write("{0} ", circleCount)
 
-            'sum detect dice
-            Me.sumDiceValue += CDbl(circleCount)
+            If (circleCount <= 0) OrElse (circleCount > 6) Then
+                '認識失敗
+                Me.errorCountRecognize += 1
+            Else
+                '認識成功
+                'sum recognize dice
+                Me.sumDiceValue += circleCount
+            End If
 
             'dice detect using average
             Me.countRecognize += 1
             If Me.countRecognize = DICE_AVERAGE Then
                 'recognize Dice
-                Me.recognizeDice = CInt(Math.Round(sumDiceValue / CDbl(DICE_AVERAGE), MidpointRounding.AwayFromZero))
+                If (DICE_AVERAGE - errorCountRecognize) <= 0 Then
+                    Me.recognizeDice = 0
+                Else
+                    Me.recognizeDice = CInt(Math.Round(sumDiceValue / CDbl(DICE_AVERAGE - errorCountRecognize), MidpointRounding.AwayFromZero))
+                End If
 
                 'debug
                 Console.WriteLine("")
                 Console.WriteLine("DetectDice:{0}", recognizeDice)
 
                 'output label(invokeしないと例外エラー）
-                Dim isFailRecognize = (recognizeDice = 0) OrElse (recognizeDice > 6)
+                Dim isFailRecognize = (recognizeDice <= 0) OrElse (recognizeDice > 6)
                 Me.BeginInvoke(
-                                Sub()
-                                    If isFailRecognize Then
-                                        lblDice.Text = "unknown"
-                                    Else
-                                        lblDice.Text = "Dice is " & recognizeDice.ToString()
-                                    End If
-                                End Sub)
+                            Sub()
+                                If isFailRecognize Then
+                                    lblDice.Text = "unknown"
+                                Else
+                                    lblDice.Text = "Dice is " & recognizeDice.ToString()
+                                End If
+                            End Sub)
 
                 'サイコロの目確認
                 If isFailRecognize = False AndAlso isRunSequence = True Then
@@ -903,6 +917,7 @@ Public Class frmMainDice
                 End If
 
                 '初期化
+                Me.errorCountRecognize = 0
                 Me.countRecognize = 0
                 Me.sumDiceValue = 0.0
 
